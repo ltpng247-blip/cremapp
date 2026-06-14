@@ -55,6 +55,15 @@ export default function RootLayout({
           crossOrigin="anonymous"
           src="//unpkg.com/same-runtime/dist/index.global.js"
         />
+        {/* Register the PWA service worker as early as possible so Chrome reliably
+            detects installability (independent of the React bundle). */}
+        <Script id="sw-register" strategy="afterInteractive">
+          {`if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+              navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch(function () {});
+            });
+          }`}
+        </Script>
       </head>
       <body suppressHydrationWarning className="antialiased">
         <ClientBody>{children}</ClientBody>

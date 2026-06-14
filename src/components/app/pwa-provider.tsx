@@ -54,7 +54,6 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   React.useEffect(() => {
-    if (process.env.NODE_ENV !== "production") return;
     if (!("serviceWorker" in navigator)) return;
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -62,8 +61,11 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
       refreshing = true;
       window.location.reload();
     });
+    // The SW is also registered by an inline <head> script for earliest possible
+    // installability detection. register() here is idempotent (same URL+scope)
+    // and gives us the registration object for update handling.
     navigator.serviceWorker
-      .register("/service-worker.js")
+      .register("/service-worker.js", { scope: "/" })
       .then((reg) => {
         regRef.current = reg;
         if (reg.waiting) setUpdateReady(true);

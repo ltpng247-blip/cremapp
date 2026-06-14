@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DEMO_PASSWORD, INSTITUTION, REGISTRAR_EMAIL } from "@/lib/supabase/constants";
 import { Logo } from "@/components/app/logo";
+import { InstallBanner } from "@/components/app/install-prompt";
 import {
   Eye,
   EyeOff,
@@ -46,6 +47,8 @@ export function LoginScreen() {
       />
       <div className="relative z-10 flex h-full flex-col">
         <StatusBar tone="light" />
+
+        <InstallBanner />
 
         <div className="flex flex-1 flex-col overflow-y-auto px-7 pb-8">
           {/* Brand */}

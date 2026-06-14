@@ -1,0 +1,9 @@
+main sha: edd74bee4
+
+public/manifest.json -> 200 size=1574
+   name=NJSSCREMAPP short=CREMAPP display=standalone icons=6
+public/service-worker.js -> 200 size=4788
+public/icons/icon-192.png -> 200 size=0
+public/icons/icon-512.png -> 200 size=0
+src/app/layout.tsx -> 200 size=2025
+   manifest-link=true fonts-link=true nextfont=false
