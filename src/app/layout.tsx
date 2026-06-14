@@ -22,7 +22,7 @@ const mono = Geist_Mono({
 
 export const metadata: Metadata = {
   applicationName: "NJSSCREMAPP",
-  title: "NJSSCREMAPP · Registrar Approvals",
+  title: "NJSSCREMAPP · Court Registry & Expense Monitoring System",
   description:
     "Court Registry Requisition and Expense Monitoring Application — review and approve FF3 requisitions and FF4 payments on the move.",
   manifest: "/manifest.json",
