@@ -1,0 +1,317 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Surfaces — warm ivory */
+    --background: 40 30% 96%;
+    --foreground: 222 24% 14%;
+
+    --card: 44 40% 99%;
+    --card-foreground: 222 24% 14%;
+
+    --popover: 44 40% 99%;
+    --popover-foreground: 222 24% 14%;
+
+    /* Judicial navy / royal blue */
+    --primary: 224 64% 31%;
+    --primary-foreground: 40 40% 96%;
+
+    --secondary: 220 22% 92%;
+    --secondary-foreground: 222 30% 24%;
+
+    --muted: 40 18% 91%;
+    --muted-foreground: 220 12% 42%;
+
+    --accent: 220 26% 92%;
+    --accent-foreground: 222 30% 24%;
+
+    /* Reject — clear red, distinct from navy */
+    --destructive: 4 66% 48%;
+    --destructive-foreground: 20 40% 98%;
+
+    --border: 38 20% 86%;
+    --input: 38 20% 86%;
+    --ring: 224 64% 31%;
+
+    --radius: 0.95rem;
+
+    /* Bird of Paradise gold */
+    --gold: 41 58% 48%;
+    --gold-foreground: 224 45% 14%;
+
+    --success: 150 58% 31%;
+    --success-foreground: 150 40% 97%;
+
+    --warning: 38 80% 44%;
+    --warning-foreground: 40 50% 98%;
+
+    --info: 213 46% 40%;
+    --info-foreground: 210 40% 97%;
+
+    /* Showcase backdrop */
+    --backdrop: 224 55% 9%;
+
+    --chart-1: 224 64% 40%;
+    --chart-2: 41 58% 48%;
+    --chart-3: 213 46% 40%;
+    --chart-4: 4 66% 48%;
+    --chart-5: 222 30% 30%;
+  }
+
+  .dark {
+    --background: 158 30% 7%;
+    --foreground: 45 30% 92%;
+    --card: 158 26% 10%;
+    --card-foreground: 45 30% 92%;
+    --popover: 158 26% 10%;
+    --popover-foreground: 45 30% 92%;
+    --primary: 150 48% 60%;
+    --primary-foreground: 158 40% 8%;
+    --secondary: 158 16% 16%;
+    --secondary-foreground: 45 30% 92%;
+    --muted: 158 14% 15%;
+    --muted-foreground: 150 8% 60%;
+    --accent: 158 16% 16%;
+    --accent-foreground: 45 30% 92%;
+    --destructive: 8 60% 52%;
+    --destructive-foreground: 20 40% 97%;
+    --border: 158 14% 18%;
+    --input: 158 14% 18%;
+    --ring: 150 48% 60%;
+    --gold: 38 60% 56%;
+    --gold-foreground: 158 40% 8%;
+    --success: 150 52% 46%;
+    --success-foreground: 158 40% 8%;
+    --warning: 38 78% 55%;
+    --warning-foreground: 158 40% 8%;
+    --info: 188 48% 52%;
+    --info-foreground: 158 40% 8%;
+    --backdrop: 158 45% 5%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply text-foreground;
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv01";
+    background-color: hsl(var(--backdrop));
+    background-image:
+      radial-gradient(
+        1200px 600px at 15% -10%,
+        hsl(224 55% 18% / 0.9),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 500px at 110% 10%,
+        hsl(41 58% 34% / 0.32),
+        transparent 55%
+      ),
+      radial-gradient(
+        800px 800px at 50% 120%,
+        hsl(224 50% 12% / 0.9),
+        transparent 60%
+      );
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display), ui-serif, Georgia, serif;
+    font-optical-sizing: auto;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), ui-serif, Georgia, serif;
+  }
+  .font-mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
+  }
+  /* Tabular figures for money / ledger columns */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ---------- Phone shell ---------- */
+.app-viewport {
+  width: 100%;
+  max-width: 430px;
+  margin-inline: auto;
+}
+
+@media (min-width: 480px) {
+  .device-frame {
+    border-radius: 2.6rem;
+    padding: 0.5rem;
+    background: linear-gradient(
+      160deg,
+      hsl(150 12% 22%),
+      hsl(158 18% 9%) 60%
+    );
+    box-shadow:
+      0 1px 0 1px hsl(0 0% 100% / 0.06) inset,
+      0 40px 80px -20px hsl(0 0% 0% / 0.6),
+      0 8px 20px -8px hsl(0 0% 0% / 0.5);
+  }
+  .device-screen {
+    border-radius: 2.15rem;
+    overflow: hidden;
+  }
+}
+
+/* ---------- Animations ---------- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  70% {
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--destructive) / 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px hsl(var(--destructive) / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--destructive) / 0);
+  }
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes count-bar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+.animate-shake {
+  animation: shake 0.4s ease both;
+}
+
+.animate-screen-in {
+  animation: screen-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-rise {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease both;
+}
+.animate-pop-in {
+  animation: pop-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-ring-pulse {
+  animation: ring-pulse 1.8s ease-out infinite;
+}
+
+.stagger > * {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger > *:nth-child(2) { animation-delay: 0.07s; }
+.stagger > *:nth-child(3) { animation-delay: 0.12s; }
+.stagger > *:nth-child(4) { animation-delay: 0.17s; }
+.stagger > *:nth-child(5) { animation-delay: 0.22s; }
+.stagger > *:nth-child(6) { animation-delay: 0.27s; }
+.stagger > *:nth-child(7) { animation-delay: 0.32s; }
+.stagger > *:nth-child(8) { animation-delay: 0.37s; }
+
+/* Keep Sonner toasts inside the phone frame */
+.device-screen [data-sonner-toaster] {
+  position: absolute !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -1,0 +1,30 @@
+[images]
+  remote_images = ["https://source.unsplash.com/.*", "https://images.unsplash.com/.*", "https://ext.same-assets.com/.*", "https://ugc.same-assets.com/.*"]
+
+[build]
+  command = "bun scripts/gen-icons.mjs && bun run build"
+  publish = "out"
+
+# PWA: service worker must not be cached and may control the whole origin
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# SPA fallback — real files (assets, /offline, manifest, sw) are served first;
+# any other path loads the app shell.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
