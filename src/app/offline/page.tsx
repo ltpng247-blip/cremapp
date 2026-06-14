@@ -44,7 +44,7 @@ export default function OfflinePage() {
         </button>
 
         <div className="mt-10 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[12px] text-white/55">
-          <FileText className="size-3.5" /> CREMAPP · Registrar Approvals
+          <FileText className="size-3.5" /> CREMAPP · Court Registry & Expense Monitoring
         </div>
       </div>
     </main>
