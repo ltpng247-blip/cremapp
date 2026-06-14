@@ -57,13 +57,13 @@ export function LoginScreen() {
               <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
                 {INSTITUTION}
               </p>
-              <h1 className="mt-2 font-display text-[2.6rem] leading-[1.05]">
-                Registrar
+              <h1 className="mt-2 font-display text-[1.95rem] leading-[1.12]">
+                Court Registry &
                 <br />
-                <span className="text-gold">Approvals</span>
+                <span className="text-gold">Expense Monitoring System</span>
               </h1>
               <p className="mt-3 max-w-[34ch] text-sm leading-relaxed text-white/55">
-                Secure executive access to FF3 & FF4 authorisations.
+                Secure access to FF3 requisitions &amp; FF4 payments.
               </p>
             </div>
 
