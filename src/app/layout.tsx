@@ -1,24 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Hanken_Grotesk, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientBody from "./ClientBody";
 import Script from "next/script";
-
-const display = Fraunces({
-  variable: "--font-display",
-  subsets: ["latin"],
-  axes: ["opsz", "SOFT", "WONK"],
-});
-
-const sans = Hanken_Grotesk({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const mono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   applicationName: "NJSSCREMAPP",
@@ -56,11 +39,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
-    >
+    <html lang="en">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap"
+        />
         <Script
           crossOrigin="anonymous"
           src="//unpkg.com/react-grab/dist/index.global.js"
