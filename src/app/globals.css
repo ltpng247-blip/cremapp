@@ -37,6 +37,11 @@
 
     --radius: 0.95rem;
 
+    /* Fonts (loaded at runtime via <link> in layout head) */
+    --font-display: "Fraunces", ui-serif, Georgia, serif;
+    --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, monospace;
+
     /* Bird of Paradise gold */
     --gold: 41 58% 48%;
     --gold-foreground: 224 45% 14%;
