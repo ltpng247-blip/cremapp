@@ -92,6 +92,8 @@ export const useApp = () => {
   return ctx;
 };
 
+const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [authStatus, setAuthStatus] = React.useState<AuthStatus>("loading");
   const [registrar, setRegistrar] = React.useState<RegistrarSession | null>(null);
@@ -109,8 +111,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = React.useState<AppNotification[]>([]);
   const [dataLoading, setDataLoading] = React.useState(false);
   const [lastSync, setLastSync] = React.useState<number | null>(null);
+  const shortcutApplied = React.useRef(false);
 
   const route = stack[stack.length - 1];
+
+  const clearSessionState = React.useCallback(() => {
+    setRegistrar(null);
+    setAuthStatus("unauthenticated");
+    setAuthError(null);
+    setSigningIn(false);
+    setPendingFF3([]);
+    setPendingFF4([]);
+    setRecentFF3([]);
+    setRecentFF4([]);
+    setNotifications([]);
+    setDataLoading(false);
+    setLastSync(null);
+    setStack([{ screen: "dashboard" }]);
+    setActiveTab("dashboard");
+    shortcutApplied.current = false;
+  }, []);
 
   /* ----------------------------------------------------- network status */
   React.useEffect(() => {
@@ -142,17 +162,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (s?.user) {
         applySession(s.user.id, s.user.email);
       } else {
-        setAuthStatus("unauthenticated");
+        clearSessionState();
       }
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       if (!session?.user) {
-        setRegistrar(null);
-        setAuthStatus("unauthenticated");
+        clearSessionState();
       }
     });
     return () => { active = false; sub.subscription.unsubscribe(); };
-  }, [applySession]);
+  }, [applySession, clearSessionState]);
 
   const signIn = React.useCallback(async (email: string, password: string) => {
     setSigningIn(true);
@@ -170,11 +189,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [applySession]);
 
   const signOut = React.useCallback(async () => {
-    await supabase.auth.signOut();
-    setRegistrar(null);
-    setAuthStatus("unauthenticated");
-    setPendingFF3([]); setPendingFF4([]); setNotifications([]);
-  }, []);
+    let signOutError: Error | null = null;
+    try {
+      const { error } = await supabase.auth.signOut();
+      signOutError = error;
+    } finally {
+      clearSessionState();
+    }
+    if (signOutError) throw signOutError;
+  }, [clearSessionState]);
+
+  /* ------------------------------------------ inactivity re-authentication */
+  React.useEffect(() => {
+    if (authStatus !== "authenticated") return;
+
+    let inactivityTimer: number | undefined;
+    const resetInactivityTimer = () => {
+      if (inactivityTimer !== undefined) window.clearTimeout(inactivityTimer);
+      inactivityTimer = window.setTimeout(() => {
+        void signOut().catch((error) => {
+          console.warn("[NJSS] inactivity sign-out failed", error);
+        });
+      }, INACTIVITY_TIMEOUT_MS);
+    };
+    const activityEvents = ["pointerdown", "keydown", "touchstart"] as const;
+    activityEvents.forEach((event) => window.addEventListener(event, resetInactivityTimer));
+    resetInactivityTimer();
+
+    return () => {
+      if (inactivityTimer !== undefined) window.clearTimeout(inactivityTimer);
+      activityEvents.forEach((event) => window.removeEventListener(event, resetInactivityTimer));
+    };
+  }, [authStatus, signOut]);
 
   /* ------------------------------------------------------------ data */
   const refreshAll = React.useCallback(async () => {
@@ -220,7 +266,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Deep-link from PWA manifest shortcuts: /?tab=approvals
-  const shortcutApplied = React.useRef(false);
   React.useEffect(() => {
     if (authStatus !== "authenticated" || shortcutApplied.current) return;
     shortcutApplied.current = true;

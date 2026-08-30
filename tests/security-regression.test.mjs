@@ -111,3 +111,37 @@ test("authoritative pending stages have explicit warning badges", () => {
   assert.match(source, /VERIFIED:\s*\{\s*label:\s*["']Awaiting approval["'],\s*variant:\s*["']warning["']/);
   assert.match(read("src/lib/supabase/mutations.ts"), /ff3\.status\s*!==\s*["']ENDORSED_SECTION_HEAD["']/);
 });
+
+test("authenticated sessions enforce five-minute inactivity sign-out", () => {
+  const source = read("src/components/app/app-provider.tsx");
+  assert.match(source, /INACTIVITY_TIMEOUT_MS\s*=\s*5\s*\*\s*60\s*\*\s*1000/);
+  assert.match(source, /authStatus\s*!==\s*["']authenticated["']/);
+  for (const event of ["pointerdown", "keydown", "touchstart"]) {
+    assert.match(source, new RegExp(`["']${event}["']`));
+  }
+  assert.match(source, /setTimeout\([\s\S]{0,160}signOut\(\)/);
+  assert.match(source, /removeEventListener/);
+  assert.match(source, /clearTimeout/);
+});
+
+test("real sign-out clears session-sensitive in-memory state", () => {
+  const source = read("src/components/app/app-provider.tsx");
+  assert.match(source, /await supabase\.auth\.signOut\(\)/);
+  assert.match(source, /finally\s*\{[\s\S]{0,100}clearSessionState\(\)/);
+  for (const setter of [
+    "setRegistrar(null)",
+    "setPendingFF3([])",
+    "setPendingFF4([])",
+    "setRecentFF3([])",
+    "setRecentFF4([])",
+    "setNotifications([])",
+  ]) {
+    assert.ok(source.includes(setter), `missing session cleanup: ${setter}`);
+  }
+});
+
+test("no local-only unlock mechanisms return", () => {
+  const source = browserSource();
+  assert.doesNotMatch(source, /DEMO_PIN|unlockBiometric|unlock\s*:\s*\(|pin\s*===/i);
+  assert.doesNotMatch(source, /Biometric unlock|Unlock with biometrics|two-factor authentication/i);
+});
