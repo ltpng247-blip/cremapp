@@ -1,9 +1,9 @@
 // View-model types consumed by the UI. They mirror the real NJSS Supabase
 // tables (ff3_headers, ff4_headers, ...) plus computed budget/commitment impact.
 
-export type ApprovalStatus = string; // SUBMITTED | APPROVED | REJECTED | RETURNED | PAID | DRAFT
+export type ApprovalStatus = string; // SUBMITTED | ENDORSED_SECTION_HEAD | VERIFIED | COMMITTED | APPROVED | REJECTED | RETURNED | PAID | DRAFT
 export type Urgency = string; // CRITICAL | HIGH | MEDIUM | LOW
-export type Decision = "APPROVED" | "REJECTED" | "RETURNED" | "ON_HOLD";
+export type Decision = "APPROVED" | "REJECTED" | "RETURNED";
 
 export interface RegistrarSession {
   authId: string;
@@ -138,6 +138,9 @@ export interface FF4Detail extends FF4Summary {
   tax_amount: number;
   deductions: number;
   payment_method: string | null;
+  payment_reference: string | null;
+  payment_date: string | null;
+  cheque_number: string | null;
   financial_year: number | null;
   rejection_reason: string | null;
   ff3_purpose: string | null;

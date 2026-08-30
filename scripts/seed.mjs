@@ -3,7 +3,7 @@
 //   bun scripts/seed.mjs
 // Reuses the EXISTING tables. Idempotent: clears prior FF3-MOB-/FF4-MOB- rows.
 // Discovers the allowed status/urgency values so we never break a CHECK
-// constraint. Writes credentials + chosen values to scripts/seed-result.txt.
+// constraint. Never creates users or changes authentication credentials.
 // ---------------------------------------------------------------------------
 import { writeFileSync } from "node:fs";
 
@@ -12,8 +12,13 @@ const SVC = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const REGISTRAR_ROLE_ID = "0cff046e-1773-4a38-a4db-a523dec894f2";
 const NJSS_DEPT_ID = "f3053501-3912-4248-a1c4-833e2233d9b3";
-const REG_EMAIL = "registrar@pngjudiciary.gov.pg";
-const REG_PASSWORD = "Registrar#2026";
+const REG_EMAIL = process.env.SEED_REGISTRAR_EMAIL;
+
+if (!U || !SVC || !REG_EMAIL) {
+  throw new Error(
+    "NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and SEED_REGISTRAR_EMAIL are required.",
+  );
+}
 
 const LOG = [];
 const flush = () => writeFileSync("scripts/seed-result.txt", LOG.join("\n") + "\n");
@@ -68,28 +73,15 @@ const round = (n) => Math.max(1, Math.round(n));
 (async () => {
   log(`SEED ${new Date().toISOString()}`);
 
-  // 1) Registrar auth user ------------------------------------------------
-  log("\n== Registrar login ==");
-  let authId = null;
-  const created = await authAdmin("POST", "admin/users", {
-    email: REG_EMAIL, password: REG_PASSWORD, email_confirm: true,
-    user_metadata: { full_name: "Ian Augerea", title: "Registrar" },
-  });
-  if (created.status === 200 || created.status === 201) {
-    authId = created.json?.id;
-    log(`created auth user ${REG_EMAIL} id=${authId}`);
-  } else {
-    log(`create returned ${created.status}: ${created.txt.slice(0, 160)}`);
-    // already exists -> find it
-    const list = await authAdmin("GET", "admin/users?per_page=200");
-    const u = (list.json?.users || []).find((x) => x.email === REG_EMAIL);
-    authId = u?.id;
-    // ensure password is set to known value
-    if (authId) {
-      await authAdmin("PUT", `admin/users/${authId}`, { password: REG_PASSWORD, email_confirm: true });
-      log(`reused existing auth user id=${authId}, password reset`);
-    }
+  // 1) Resolve an existing Registrar auth user without changing credentials.
+  log("\n== Registrar account lookup ==");
+  const list = await authAdmin("GET", "admin/users?per_page=200");
+  const authUser = (list.json?.users || []).find((user) => user.email === REG_EMAIL);
+  const authId = authUser?.id;
+  if (!authId) {
+    throw new Error("The configured Registrar account does not exist; provision it through the approved admin process.");
   }
+  log(`reused existing auth user id=${authId}`);
 
   // users row + role
   let regUserId = null;
@@ -399,7 +391,7 @@ const round = (n) => Math.max(1, Math.round(n));
 
   // 9) Summary ------------------------------------------------------------
   log("\n== DONE ==");
-  log(`REGISTRAR LOGIN: ${REG_EMAIL} / ${REG_PASSWORD}`);
+  log(`REGISTRAR ACCOUNT: ${REG_EMAIL}`);
   log(`registrar users.id=${regUserId} auth_user_id=${authId}`);
   log(`status map: ${JSON.stringify(ST)}`);
   log(`urgency map: ${JSON.stringify(URG)}`);

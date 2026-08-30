@@ -20,6 +20,7 @@ const MAP: Record<string, { label: string; tone: string; icon: any }> = {
   SUBMITTED: { label: "Submitted", tone: "info", icon: Send },
   ENDORSED: { label: "Endorsed", tone: "info", icon: Check },
   APPROVED: { label: "Approved", tone: "success", icon: Check },
+  COMMITTED: { label: "Approved & committed", tone: "success", icon: Check },
   REJECTED: { label: "Rejected", tone: "destructive", icon: Ban },
   RETURNED: { label: "Returned", tone: "gold", icon: CornerUpLeft },
   ON_HOLD: { label: "On hold", tone: "warning", icon: PauseCircle },

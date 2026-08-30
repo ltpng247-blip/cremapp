@@ -31,7 +31,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-const PENDING = ["SUBMITTED", "PENDING", "ENDORSED", "PENDING_APPROVAL", "UNDER_REVIEW"];
+const PENDING = ["ENDORSED_SECTION_HEAD"];
 
 export function FF3DetailScreen() {
   const { route, back, submitFF3Decision } = useApp();
@@ -213,7 +213,7 @@ export function FF3DetailScreen() {
         {!pending && (
           <div className={cn(
             "rounded-2xl border p-4",
-            d.status === "APPROVED" ? "border-success/30 bg-success/6" : "border-destructive/30 bg-destructive/6",
+            ["COMMITTED", "APPROVED"].includes(d.status) ? "border-success/30 bg-success/6" : "border-destructive/30 bg-destructive/6",
           )}>
             <p className="text-[13px] font-semibold text-foreground">This requisition was {d.status?.toLowerCase()}.</p>
             {d.rejection_reason && <p className="mt-1 text-[13px] text-muted-foreground">{d.rejection_reason}</p>}

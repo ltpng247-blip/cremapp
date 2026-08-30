@@ -114,7 +114,7 @@ export async function fetchRecentFF3(limit = 25): Promise<FF3Summary[]> {
   const { data, error } = await supabase
     .from("ff3_headers")
     .select(FF3_LIST_SELECT)
-    .in("status", ["APPROVED", "REJECTED", "RETURNED"])
+    .in("status", ["COMMITTED", "APPROVED", "REJECTED", "RETURNED"])
     .order("updated_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
@@ -266,6 +266,9 @@ export async function fetchFF4(id: string): Promise<FF4Detail | null> {
     tax_amount: num(data.tax_amount),
     deductions: num(data.deductions),
     payment_method: data.payment_method ?? null,
+    payment_reference: data.payment_reference ?? null,
+    payment_date: data.payment_date ?? null,
+    cheque_number: data.cheque_number ?? null,
     financial_year: data.financial_year ?? null,
     rejection_reason: data.rejection_reason ?? null,
     ff3_purpose: data.ff3?.purpose ?? null,

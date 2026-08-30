@@ -9,6 +9,7 @@ import { Money, InitialsAvatar, SectionLabel, EmptyState } from "@/components/ap
 import {
   greeting,
   isApprovedToday,
+  isSuccessfulApproval,
   isCritical,
   isOverdue,
   isUrgent,
@@ -46,7 +47,7 @@ export function DashboardScreen() {
   const overdueCount = pending.filter((i) => isOverdue(i.submitted_date)).length;
 
   const approvedToday = [
-    ...recentFF3.filter((f) => f.status === "APPROVED" && isApprovedToday(f.approved_date)),
+    ...recentFF3.filter((f) => isSuccessfulApproval(f) && isApprovedToday(f.approved_date)),
     ...recentFF4.filter((f) => f.status === "APPROVED" && isApprovedToday(f.approved_date)),
   ];
   const approvedTodayValue = sumValue(approvedToday as PendingItem[]);
@@ -78,7 +79,7 @@ export function DashboardScreen() {
 
         {!online && (
           <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-warning/15 px-3 py-2 text-[12px] font-medium text-warning">
-            <WifiOff className="size-3.5" /> Offline — showing cached approvals. Actions will sync on reconnect.
+            <WifiOff className="size-3.5" /> Offline — live NJSS data is unavailable. Reconnect to refresh or act.
           </div>
         )}
 

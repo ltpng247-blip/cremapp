@@ -4,26 +4,22 @@ import * as React from "react";
 import { useApp } from "@/components/app/app-provider";
 import { StatusBar } from "@/components/app/phone-frame";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { DEMO_PASSWORD, INSTITUTION, REGISTRAR_EMAIL } from "@/lib/supabase/constants";
+import { INSTITUTION } from "@/lib/supabase/constants";
 import { Logo } from "@/components/app/logo";
 import { InstallBanner } from "@/components/app/install-prompt";
 import {
   Eye,
   EyeOff,
-  Fingerprint,
-  KeyRound,
   Loader2,
   Lock,
   Mail,
   ShieldCheck,
-  Smartphone,
 } from "lucide-react";
 
 export function LoginScreen() {
   const { signIn, signingIn, authError } = useApp();
-  const [email, setEmail] = React.useState(REGISTRAR_EMAIL);
-  const [password, setPassword] = React.useState(DEMO_PASSWORD);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [show, setShow] = React.useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -115,36 +111,7 @@ export function LoginScreen() {
                 {signingIn ? "Verifying…" : "Sign in securely"}
               </Button>
 
-              <div className="flex items-center justify-between pt-1 text-[13px] text-white/55">
-                <button type="button" className="inline-flex items-center gap-1.5 hover:text-white">
-                  <KeyRound className="size-3.5" /> Reset password
-                </button>
-                <span className="inline-flex items-center gap-1.5">
-                  <Smartphone className="size-3.5 text-success" /> Device registered
-                </span>
-              </div>
             </form>
-          </div>
-
-          {/* Biometric + security footer */}
-          <div className="mt-8 animate-rise" style={{ animationDelay: "0.16s" }}>
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-white/10" />
-              <span className="text-[11px] uppercase tracking-widest text-white/35">or</span>
-              <div className="h-px flex-1 bg-white/10" />
-            </div>
-            <button
-              type="button"
-              onClick={submit}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 py-3.5 text-sm font-semibold text-white/90 backdrop-blur transition active:scale-[0.98]"
-            >
-              <Fingerprint className="size-5 text-gold" />
-              Unlock with biometrics
-            </button>
-            <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-[11px] text-white/40">
-              <ShieldCheck className="size-3.5" />
-              Protected by two-factor authentication
-            </p>
           </div>
         </div>
       </div>
