@@ -6,7 +6,7 @@ import { useApp } from "@/components/app/app-provider";
 import { AppHeader } from "@/components/app/app-header";
 import { Money, Meter } from "@/components/app/primitives";
 import { fetchBudgetLines } from "@/lib/supabase/queries";
-import { amountOf, isApprovedToday, isOverdue, sumValue } from "@/lib/filters";
+import { amountOf, isApprovedToday, isOverdue, isSuccessfulApproval, sumValue } from "@/lib/filters";
 import { kina, kinaCompact } from "@/lib/format";
 import type { BudgetLineView, FF3Summary, FF4Summary, PendingItem } from "@/lib/types";
 
@@ -93,7 +93,7 @@ function ItemList({ items }: { items: PendingItem[] }) {
 /* ------------------------------------------------------------- variants */
 function Daily({ decided, pending }: { decided: PendingItem[]; pending: PendingItem[] }) {
   const today = decided.filter((d) => isApprovedToday((d as any).approved_date));
-  const approved = today.filter((d) => d.status === "APPROVED");
+  const approved = today.filter(isSuccessfulApproval);
   const rejected = today.filter((d) => d.status === "REJECTED" || d.status === "RETURNED");
   return (
     <>
@@ -108,7 +108,7 @@ function Daily({ decided, pending }: { decided: PendingItem[]; pending: PendingI
 }
 
 function Weekly({ decided }: { decided: PendingItem[] }) {
-  const approved = decided.filter((d) => d.status === "APPROVED");
+  const approved = decided.filter(isSuccessfulApproval);
   const ff3 = approved.filter((d) => d.kind === "FF3");
   const ff4 = approved.filter((d) => d.kind === "FF4");
   return (

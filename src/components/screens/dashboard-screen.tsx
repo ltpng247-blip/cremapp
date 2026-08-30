@@ -9,6 +9,7 @@ import { Money, InitialsAvatar, SectionLabel, EmptyState } from "@/components/ap
 import {
   greeting,
   isApprovedToday,
+  isSuccessfulApproval,
   isCritical,
   isOverdue,
   isUrgent,
@@ -46,7 +47,7 @@ export function DashboardScreen() {
   const overdueCount = pending.filter((i) => isOverdue(i.submitted_date)).length;
 
   const approvedToday = [
-    ...recentFF3.filter((f) => f.status === "APPROVED" && isApprovedToday(f.approved_date)),
+    ...recentFF3.filter((f) => isSuccessfulApproval(f) && isApprovedToday(f.approved_date)),
     ...recentFF4.filter((f) => f.status === "APPROVED" && isApprovedToday(f.approved_date)),
   ];
   const approvedTodayValue = sumValue(approvedToday as PendingItem[]);

@@ -87,3 +87,27 @@ test("service worker neither caches nor serves Supabase API responses", () => {
 test("browser source never references the Supabase service-role key", () => {
   assert.doesNotMatch(browserSource(), /SUPABASE_SERVICE_ROLE_KEY/);
 });
+
+test("recent FF3 includes authoritative and legacy terminal states", () => {
+  const source = read("src/lib/supabase/queries.ts");
+  assert.match(
+    source,
+    /\.in\(["']status["'],\s*\[["']COMMITTED["'],\s*["']APPROVED["'],\s*["']REJECTED["'],\s*["']RETURNED["']\]\)/,
+  );
+});
+
+test("COMMITTED is represented as a successful FF3 state", () => {
+  const primitives = read("src/components/app/primitives.tsx");
+  const filters = read("src/lib/filters.ts");
+  const detail = read("src/components/screens/ff3-detail-screen.tsx");
+  assert.match(primitives, /COMMITTED:\s*\{\s*label:\s*["']Approved & committed["'],\s*variant:\s*["']success["']/);
+  assert.match(filters, /item\.kind\s*===\s*["']FF3["'][\s\S]{0,160}["']COMMITTED["']/);
+  assert.match(detail, /\[["']COMMITTED["'],\s*["']APPROVED["']\]\.includes/);
+});
+
+test("authoritative pending stages have explicit warning badges", () => {
+  const source = read("src/components/app/primitives.tsx");
+  assert.match(source, /ENDORSED_SECTION_HEAD:\s*\{\s*label:\s*["']Awaiting Registrar["'],\s*variant:\s*["']warning["']/);
+  assert.match(source, /VERIFIED:\s*\{\s*label:\s*["']Awaiting approval["'],\s*variant:\s*["']warning["']/);
+  assert.match(read("src/lib/supabase/mutations.ts"), /ff3\.status\s*!==\s*["']ENDORSED_SECTION_HEAD["']/);
+});

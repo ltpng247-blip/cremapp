@@ -1,7 +1,7 @@
 // View-model types consumed by the UI. They mirror the real NJSS Supabase
 // tables (ff3_headers, ff4_headers, ...) plus computed budget/commitment impact.
 
-export type ApprovalStatus = string; // SUBMITTED | APPROVED | REJECTED | RETURNED | PAID | DRAFT
+export type ApprovalStatus = string; // SUBMITTED | ENDORSED_SECTION_HEAD | VERIFIED | COMMITTED | APPROVED | REJECTED | RETURNED | PAID | DRAFT
 export type Urgency = string; // CRITICAL | HIGH | MEDIUM | LOW
 export type Decision = "APPROVED" | "REJECTED" | "RETURNED";
 

@@ -7,7 +7,7 @@ import { isCritical, isUrgent } from "@/lib/filters";
 import { ChevronRight, TriangleAlert, Building2, User } from "lucide-react";
 import type { FF3Summary, FF4Summary, PendingItem } from "@/lib/types";
 
-const PENDING_STATES = ["SUBMITTED", "PENDING", "ENDORSED", "PENDING_APPROVAL", "UNDER_REVIEW", "VERIFIED"];
+const PENDING_STATES = ["SUBMITTED", "PENDING", "ENDORSED", "PENDING_APPROVAL", "UNDER_REVIEW", "ENDORSED_SECTION_HEAD", "VERIFIED"];
 
 export function ApprovalCard({ item, onClick }: { item: PendingItem; onClick: () => void }) {
   const isFF3 = item.kind === "FF3";

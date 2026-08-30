@@ -114,7 +114,7 @@ export async function fetchRecentFF3(limit = 25): Promise<FF3Summary[]> {
   const { data, error } = await supabase
     .from("ff3_headers")
     .select(FF3_LIST_SELECT)
-    .in("status", ["APPROVED", "REJECTED", "RETURNED"])
+    .in("status", ["COMMITTED", "APPROVED", "REJECTED", "RETURNED"])
     .order("updated_at", { ascending: false })
     .limit(limit);
   if (error) throw error;

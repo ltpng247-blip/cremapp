@@ -79,6 +79,12 @@ export function isApprovedToday(approvedDate: string | null | undefined, now = D
   return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
 }
 
+export function isSuccessfulApproval(item: PendingItem): boolean {
+  return item.kind === "FF3"
+    ? ["COMMITTED", "APPROVED"].includes(item.status)
+    : item.status === "APPROVED";
+}
+
 export function greeting(now = new Date()): string {
   const h = now.getHours();
   if (h < 12) return "Good morning";

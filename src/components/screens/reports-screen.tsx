@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useApp } from "@/components/app/app-provider";
 import { AppHeader } from "@/components/app/app-header";
 import { Money, SectionLabel } from "@/components/app/primitives";
-import { isApprovedToday, sumValue } from "@/lib/filters";
+import { isApprovedToday, isSuccessfulApproval, sumValue } from "@/lib/filters";
 import type { PendingItem } from "@/lib/types";
 import {
   BarChart3,
@@ -45,7 +45,7 @@ export function ReportsScreen() {
   const pending: PendingItem[] = React.useMemo(() => [...pendingFF3, ...pendingFF4], [pendingFF3, pendingFF4]);
   const decided: PendingItem[] = React.useMemo(() => [...recentFF3, ...recentFF4], [recentFF3, recentFF4]);
 
-  const approvedToday = decided.filter((d) => d.status === "APPROVED" && isApprovedToday((d as any).approved_date));
+  const approvedToday = decided.filter((d) => isSuccessfulApproval(d) && isApprovedToday((d as any).approved_date));
   const week = React.useMemo(() => buildWeek(decided), [decided]);
   const maxWeek = Math.max(1, ...week.map((w) => w.count));
 
@@ -124,7 +124,7 @@ function buildWeek(decided: PendingItem[]) {
     const label = d.toLocaleDateString("en-GB", { weekday: "short" })[0];
     const count = decided.filter((x) => {
       const ad = (x as any).approved_date;
-      if (!ad || x.status !== "APPROVED") return false;
+      if (!ad || !isSuccessfulApproval(x)) return false;
       const a = new Date(ad);
       return a.getFullYear() === d.getFullYear() && a.getMonth() === d.getMonth() && a.getDate() === d.getDate();
     }).length;
