@@ -1,5 +1,16 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Required configuration
+
+The browser application fails closed unless both public Supabase variables are configured:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+```
+
+Only the public anon key belongs in the browser build. Privileged backend credentials must never be exposed through `NEXT_PUBLIC_*` variables or frontend source.
+
 ## Getting Started
 
 First, run the development server:

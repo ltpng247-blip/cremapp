@@ -12,7 +12,6 @@ import {
   Loader2,
   Lock,
   Mic,
-  PauseCircle,
   Square,
   TriangleAlert,
   X,
@@ -22,14 +21,12 @@ const QUICK: Record<Decision, string[]> = {
   APPROVED: ["Approved as presented.", "Within budget — approved.", "Cleared for payment.", "Noted and approved."],
   REJECTED: ["Insufficient budget.", "Not adequately justified.", "Duplicate request.", "Incorrect expense coding."],
   RETURNED: ["Obtain three competitive quotations.", "Attach the supplier invoice.", "Revise the estimated amounts.", "Clarify the purpose of expenditure."],
-  ON_HOLD: ["Pending clarification from department.", "Awaiting supporting documents."],
 };
 
 const META: Record<Decision, { label: string; verb: string; tone: "success" | "destructive" | "gold" | "warning"; icon: any }> = {
   APPROVED: { label: "Approve", verb: "Approve", tone: "success", icon: Check },
   REJECTED: { label: "Reject", verb: "Reject", tone: "destructive", icon: Ban },
   RETURNED: { label: "Return", verb: "Return for correction", tone: "gold", icon: CornerUpLeft },
-  ON_HOLD: { label: "Hold", verb: "Place on hold", tone: "warning", icon: PauseCircle },
 };
 
 export function DecisionBar({
@@ -87,12 +84,16 @@ export function DecisionBar({
           </div>
         )}
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="flex-1 border-warning/40 text-warning hover:bg-warning/10" onClick={() => open("RETURNED")}>
-            <CornerUpLeft className="size-4" /> Return
-          </Button>
-          <Button variant="outline" className="flex-1 border-destructive/40 text-destructive hover:bg-destructive/10" onClick={() => open("REJECTED")}>
-            <Ban className="size-4" /> Reject
-          </Button>
+          {kind === "FF3" && (
+            <>
+              <Button variant="outline" className="flex-1 border-warning/40 text-warning hover:bg-warning/10" onClick={() => open("RETURNED")}>
+                <CornerUpLeft className="size-4" /> Return
+              </Button>
+              <Button variant="outline" className="flex-1 border-destructive/40 text-destructive hover:bg-destructive/10" onClick={() => open("REJECTED")}>
+                <Ban className="size-4" /> Reject
+              </Button>
+            </>
+          )}
           <Button
             variant="success"
             className="flex-[1.4]"
@@ -101,11 +102,6 @@ export function DecisionBar({
           >
             <Check className="size-4" /> Approve
           </Button>
-        </div>
-        <div className="mt-2 flex justify-center">
-          <button onClick={() => open("ON_HOLD")} className="text-[12px] font-medium text-muted-foreground hover:text-foreground">
-            Hold for clarification
-          </button>
         </div>
       </div>
 

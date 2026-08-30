@@ -12,7 +12,6 @@ import { useLocalState } from "@/lib/use-local-state";
 import { INSTITUTION } from "@/lib/supabase/constants";
 import {
   BadgeCheck,
-  KeyRound,
   LogOut,
   Mail,
   Phone,
@@ -122,10 +121,6 @@ export function ProfileScreen() {
 
         {/* actions */}
         <div className="mt-5 space-y-2">
-          <button onClick={() => toast.info("Password reset link sent", { description: registrar?.email })} className="flex w-full items-center gap-3 rounded-2xl border border-border/70 bg-card px-4 py-3 text-left transition active:scale-[0.99]">
-            <KeyRound className="size-4 text-muted-foreground" />
-            <span className="flex-1 text-[14px] font-medium text-foreground">Change password</span>
-          </button>
           <button onClick={signOut} className="flex w-full items-center gap-3 rounded-2xl border border-destructive/25 bg-destructive/6 px-4 py-3 text-left text-destructive transition active:scale-[0.99]">
             <LogOut className="size-4" />
             <span className="flex-1 text-[14px] font-semibold">Sign out</span>

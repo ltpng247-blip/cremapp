@@ -1,8 +1,7 @@
 /* NJSSCREMAPP (CREMAPP) — service worker */
-const VERSION = "cremapp-v1";
+const VERSION = "cremapp-v2";
 const SHELL = `cremapp-shell-${VERSION}`;
 const STATIC = `cremapp-static-${VERSION}`;
-const SUPA = `cremapp-supabase-${VERSION}`;
 
 const PRECACHE = [
   "/",
@@ -32,7 +31,11 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => !k.endsWith(VERSION)).map((k) => caches.delete(k)));
+      await Promise.all(
+        keys
+          .filter((key) => key.startsWith("cremapp-supabase-") || !key.endsWith(VERSION))
+          .map((key) => caches.delete(key)),
+      );
       await self.clients.claim();
     })(),
   );
@@ -42,12 +45,25 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-const isSupabase = (url) => url.hostname.endsWith("supabase.co");
+const SUPABASE_API_PATHS = [
+  "/rest/v1/",
+  "/auth/v1/",
+  "/storage/v1/",
+  "/functions/v1/",
+  "/realtime/v1/",
+  "/graphql/v1",
+];
+
+const isSupabaseApiRequest = (url) =>
+  url.hostname.endsWith(".supabase.co") || SUPABASE_API_PATHS.some((path) => url.pathname.startsWith(path));
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return; // never cache mutations / approvals
   const url = new URL(req.url);
+
+  // Authenticated Supabase traffic must always go directly to the network.
+  if (isSupabaseApiRequest(url)) return;
 
   // App navigations: network-first -> cached shell -> offline page
   if (req.mode === "navigate") {
@@ -61,25 +77,6 @@ self.addEventListener("fetch", (event) => {
         } catch (_) {
           const cache = await caches.open(SHELL);
           return (await cache.match("/")) || (await cache.match("/offline")) || Response.error();
-        }
-      })(),
-    );
-    return;
-  }
-
-  // Supabase reads: network-first, fall back to last cached response when offline
-  if (isSupabase(url)) {
-    if (url.pathname.includes("/auth/")) return; // never cache auth
-    event.respondWith(
-      (async () => {
-        try {
-          const fresh = await fetch(req);
-          const cache = await caches.open(SUPA);
-          cache.put(req, fresh.clone()).catch(() => {});
-          return fresh;
-        } catch (_) {
-          const cached = await caches.match(req);
-          return cached || new Response("[]", { status: 200, headers: { "Content-Type": "application/json" } });
         }
       })(),
     );
@@ -142,11 +139,4 @@ self.addEventListener("notificationclick", (event) => {
       if (self.clients.openWindow) return self.clients.openWindow(target);
     })(),
   );
-});
-
-/* -------------------------------- Background sync (reserved) ------------------------- */
-self.addEventListener("sync", (event) => {
-  if (event.tag === "cremapp-sync-approvals") {
-    // Reserved: replay approval decisions queued while offline.
-  }
 });

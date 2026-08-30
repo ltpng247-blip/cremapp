@@ -31,7 +31,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-const PENDING = ["SUBMITTED", "PENDING", "ENDORSED", "PENDING_APPROVAL", "UNDER_REVIEW"];
+const PENDING = ["ENDORSED_SECTION_HEAD"];
 
 export function FF3DetailScreen() {
   const { route, back, submitFF3Decision } = useApp();

@@ -29,7 +29,7 @@ import {
   Lock,
 } from "lucide-react";
 
-const PENDING = ["SUBMITTED", "PENDING", "VERIFIED", "PENDING_APPROVAL", "UNDER_REVIEW"];
+const PENDING = ["VERIFIED"];
 
 export function FF4DetailScreen() {
   const { route, back, nav, submitFF4Decision } = useApp();

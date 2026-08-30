@@ -3,10 +3,6 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
-import { DEMO_PIN, DEMO_PASSWORD, REGISTRAR_EMAIL } from "@/lib/supabase/constants";
-
-// Auto-login for preview screenshot verification only. Keep false in production.
-const PREVIEW_AUTO_LOGIN = false;
 import {
   fetchNotifications,
   fetchPendingFF3,
@@ -52,7 +48,6 @@ type AuthStatus = "loading" | "unauthenticated" | "authenticated";
 interface AppState {
   authStatus: AuthStatus;
   registrar: RegistrarSession | null;
-  locked: boolean;
   authError: string | null;
   signingIn: boolean;
 
@@ -73,9 +68,6 @@ interface AppState {
   // actions
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  lock: () => void;
-  unlock: (pin: string) => boolean;
-  unlockBiometric: () => void;
 
   nav: (screen: ScreenName, params?: Record<string, string>) => void;
   back: () => void;
@@ -100,12 +92,9 @@ export const useApp = () => {
   return ctx;
 };
 
-const AUTO_LOCK_MS = 5 * 60 * 1000;
-
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [authStatus, setAuthStatus] = React.useState<AuthStatus>("loading");
   const [registrar, setRegistrar] = React.useState<RegistrarSession | null>(null);
-  const [locked, setLocked] = React.useState(false);
   const [authError, setAuthError] = React.useState<string | null>(null);
   const [signingIn, setSigningIn] = React.useState(false);
   const [online, setOnline] = React.useState(true);
@@ -151,17 +140,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!active) return;
       const s = data.session;
       if (s?.user) {
-        setLocked(false);
         applySession(s.user.id, s.user.email);
-      } else if (PREVIEW_AUTO_LOGIN) {
-        // TEMP preview verification — auto sign in
-        supabase.auth
-          .signInWithPassword({ email: REGISTRAR_EMAIL, password: DEMO_PASSWORD })
-          .then(({ data: d }) => {
-            if (!active) return;
-            if (d?.user) { setLocked(false); applySession(d.user.id, d.user.email); }
-            else setAuthStatus("unauthenticated");
-          });
       } else {
         setAuthStatus("unauthenticated");
       }
@@ -184,7 +163,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSigningIn(false);
       throw error;
     }
-    setLocked(false);
     setStack([{ screen: "dashboard" }]);
     setActiveTab("dashboard");
     if (data.user) await applySession(data.user.id, data.user.email);
@@ -195,29 +173,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     setRegistrar(null);
     setAuthStatus("unauthenticated");
-    setLocked(false);
     setPendingFF3([]); setPendingFF4([]); setNotifications([]);
   }, []);
-
-  const lock = React.useCallback(() => setLocked(true), []);
-  const unlock = React.useCallback((pin: string) => {
-    if (pin === DEMO_PIN) { setLocked(false); return true; }
-    return false;
-  }, []);
-  const unlockBiometric = React.useCallback(() => setLocked(false), []);
-
-  /* -------------------------------------------------- inactivity auto-lock */
-  const lastActivity = React.useRef(Date.now());
-  React.useEffect(() => {
-    if (authStatus !== "authenticated" || locked) return;
-    const bump = () => { lastActivity.current = Date.now(); };
-    const events = ["pointerdown", "keydown", "touchstart"];
-    events.forEach((e) => window.addEventListener(e, bump));
-    const id = window.setInterval(() => {
-      if (Date.now() - lastActivity.current > AUTO_LOCK_MS) setLocked(true);
-    }, 15000);
-    return () => { events.forEach((e) => window.removeEventListener(e, bump)); window.clearInterval(id); };
-  }, [authStatus, locked]);
 
   /* ------------------------------------------------------------ data */
   const refreshAll = React.useCallback(async () => {
@@ -240,15 +197,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [registrar]);
 
   React.useEffect(() => {
-    if (authStatus === "authenticated" && !locked && registrar) refreshAll();
-  }, [authStatus, locked, registrar, refreshAll]);
+    if (authStatus === "authenticated" && registrar) refreshAll();
+  }, [authStatus, registrar, refreshAll]);
 
   // Light background sync for "instant" alerts.
   React.useEffect(() => {
-    if (authStatus !== "authenticated" || locked || !online) return;
+    if (authStatus !== "authenticated" || !online) return;
     const id = window.setInterval(() => { refreshAll(); }, 60000);
     return () => window.clearInterval(id);
-  }, [authStatus, locked, online, refreshAll]);
+  }, [authStatus, online, refreshAll]);
 
   /* ----------------------------------------------------- navigation */
   const nav = React.useCallback((screen: ScreenName, params?: Record<string, string>) => {
@@ -265,7 +222,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Deep-link from PWA manifest shortcuts: /?tab=approvals
   const shortcutApplied = React.useRef(false);
   React.useEffect(() => {
-    if (authStatus !== "authenticated" || locked || shortcutApplied.current) return;
+    if (authStatus !== "authenticated" || shortcutApplied.current) return;
     shortcutApplied.current = true;
     try {
       const params = new URLSearchParams(window.location.search);
@@ -276,7 +233,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch {
       /* ignore */
     }
-  }, [authStatus, locked, setTab]);
+  }, [authStatus, setTab]);
   const openRef = React.useCallback((refType: string | null, refId: string | null) => {
     if (!refType || !refId) return;
     const t = refType.toUpperCase();
@@ -296,16 +253,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!online) { toast.error("You are offline", { description: "Reconnect to submit this decision." }); return false; }
     try {
       await decideFF3({
-        ff3: {
-          id: d.id, ff3_number: d.ff3_number, expense_code_registry_id: d.expense_code_registry_id,
-          financial_year: d.financial_year, total_estimated_amount: d.total_estimated_amount,
-          requesting_officer_id: d.requesting_officer_id,
-        },
+        ff3: { id: d.id, status: d.status },
         decision, comment,
-        registrar: { userId: registrar?.userId ?? null, name: registrar?.name ?? "Registrar" },
+        userEmail: registrar?.email ?? "",
       });
       const verb = decision === "APPROVED" ? "approved" : decision === "REJECTED" ? "rejected" : "returned";
-      toast.success(`${d.ff3_number} ${verb}`, { description: decision === "APPROVED" ? "Commitment raised. The system has been updated." : "The requesting officer has been notified." });
+      toast.success(`${d.ff3_number} ${verb}`, { description: "The authoritative NJSS workflow has been updated." });
       await refreshAll();
       return true;
     } catch (e: any) {
@@ -320,11 +273,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toast.error("Approval blocked", { description: "Payment exceeds the remaining commitment balance." });
       return false;
     }
+    if (decision !== "APPROVED") {
+      toast.error("Unsupported FF4 action", { description: "CREMAPP only supports final FF4 approval." });
+      return false;
+    }
     try {
       await decideFF4({
-        ff4: { id: d.id, ff4_number: d.ff4_number, net_amount: d.net_amount, payee_name: d.payee_name, commitment: d.commitment, ff3_header_id: d.ff3_header_id },
+        ff4: {
+          id: d.id, status: d.status, net_amount: d.net_amount, commitment: d.commitment,
+          payment_reference: d.payment_reference, payment_date: d.payment_date,
+          payment_method: d.payment_method, cheque_number: d.cheque_number,
+        },
         decision, comment,
-        registrar: { userId: registrar?.userId ?? null, name: registrar?.name ?? "Registrar" },
+        userEmail: registrar?.email ?? "",
       });
       const verb = decision === "APPROVED" ? "approved" : decision === "REJECTED" ? "rejected" : "returned";
       toast.success(`${d.ff4_number} ${verb}`, { description: "Payment status updated across the system." });
@@ -354,10 +315,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const pendingCount = pendingFF3.length + pendingFF4.length;
 
   const value: AppState = {
-    authStatus, registrar, locked, authError, signingIn, online,
+    authStatus, registrar, authError, signingIn, online,
     route, canGoBack: stack.length > 1, activeTab,
     pendingFF3, pendingFF4, recentFF3, recentFF4, notifications, dataLoading, lastSync,
-    signIn, signOut, lock, unlock, unlockBiometric,
+    signIn, signOut,
     nav, back, setTab, openRef,
     refreshAll, submitFF3Decision, submitFF4Decision,
     readNotification, readAllNotifications, removeNotification,
@@ -366,5 +327,3 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
-
-export { REGISTRAR_EMAIL };

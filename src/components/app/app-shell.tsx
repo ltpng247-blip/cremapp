@@ -8,7 +8,6 @@ import { BottomNav } from "./bottom-nav";
 import { MoreMenu } from "./more-menu";
 import { PwaBanners } from "./pwa-banners";
 import { LoginScreen } from "@/components/screens/login-screen";
-import { LockScreen } from "@/components/screens/lock-screen";
 import { DashboardScreen } from "@/components/screens/dashboard-screen";
 import { ApprovalsScreen } from "@/components/screens/approvals-screen";
 import { FF3DetailScreen } from "@/components/screens/ff3-detail-screen";
@@ -55,12 +54,11 @@ function Splash() {
 }
 
 function Inner() {
-  const { authStatus, locked, route, canGoBack } = useApp();
+  const { authStatus, route, canGoBack } = useApp();
   const [moreOpen, setMoreOpen] = React.useState(false);
 
   if (authStatus === "loading") return <Splash />;
   if (authStatus === "unauthenticated") return <LoginScreen />;
-  if (locked) return <LockScreen />;
 
   return (
     <div className="flex h-full flex-col">
